@@ -52,3 +52,28 @@ def transcribe_audio(audio_path, model):
 		raise RuntimeError(message) from exc
 
 	return segments, info
+
+
+def build_transcript(segments, language):
+	words = []
+	for segment in segments:
+		for word in segment.words:
+			clean_word = word.word.strip()
+			words.append(
+				{
+					"word": clean_word,
+					"start": round(word.start, 2),
+					"end": round(word.end, 2),
+				}
+			)
+
+	return {"language": language, "words": words}
+
+
+def save_transcript(data, output_path):
+	try:
+		with open(output_path, "w", encoding="utf-8") as file:
+			json.dump(data, file, indent=4, ensure_ascii=False)
+	except Exception as exc:
+		message = str(exc).strip() or "save failed"
+		raise RuntimeError(message) from exc
