@@ -77,15 +77,21 @@ def save_transcript(data, output_path):
 		raise RuntimeError(f"save failed: {message}") from exc
 
 
+def get_autoshorts_root():
+	return os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+
 def transcribe_video(video_path, transcript_path, model_size="base"):
 	if not os.path.isfile(video_path):
 		raise FileNotFoundError(video_path)
 
-	temp_dir = "temp"
-	if not os.path.isdir(temp_dir):
-		os.makedirs(temp_dir)
+	base_dir = get_autoshorts_root()
+	temp_dir = os.path.join(base_dir, "temp")
+	os.makedirs(temp_dir, exist_ok=True)
 
-	audio_path = "temp/audio.wav"
+	audio_path = os.path.join(temp_dir, "audio.wav")
+	if not os.path.isabs(transcript_path):
+		transcript_path = os.path.join(base_dir, transcript_path)
 	print("extracting audio...")
 	extract_audio(video_path, audio_path)
 	print("loading model...")
@@ -100,5 +106,7 @@ def transcribe_video(video_path, transcript_path, model_size="base"):
 
 
 if __name__ == "__main__":
-	transcript = transcribe_video("autoshorts/uploads/test.mp4", "transcript.json", "tiny")
+	base_dir = get_autoshorts_root()
+	video_path = os.path.join(base_dir, "uploads", "test.mp4")
+	transcript = transcribe_video(video_path, "transcript.json", "tiny")
 	print(len(transcript["words"]))
