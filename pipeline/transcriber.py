@@ -1,7 +1,4 @@
 # transcription logic here
-# first install faster-whisper using: pip install faster-whisper
-# then install ffmpeg
-
 import json
 import os
 import subprocess
