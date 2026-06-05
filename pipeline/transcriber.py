@@ -1,5 +1,6 @@
 # transcription logic here
-# first install faster whisper using: pip install faster-whisper   
+# first install faster-whisper using: pip install faster-whisper
+# then install ffmpeg
 
 import json
 import os
@@ -34,8 +35,8 @@ def extract_audio(video_path, audio_path):
 		raise RuntimeError("ffmpeg not found") from exc
 	except subprocess.CalledProcessError as exc:
 		error_text = (exc.stderr or "").strip()
-		message = error_text or "ffmpeg failed"
-		raise RuntimeError(message) from exc
+		message = error_text or "unknown ffmpeg error"
+		raise RuntimeError(f"ffmpeg failed: {message}") from exc
 
 	return result
 
@@ -48,8 +49,8 @@ def transcribe_audio(audio_path, model):
 	try:
 		segments, info = model.transcribe(audio_path, word_timestamps=True)
 	except Exception as exc:
-		message = str(exc).strip() or "transcription failed"
-		raise RuntimeError(message) from exc
+		message = str(exc).strip() or "unknown transcription error"
+		raise RuntimeError(f"transcription failed: {message}") from exc
 
 	return segments, info
 
@@ -75,5 +76,32 @@ def save_transcript(data, output_path):
 		with open(output_path, "w", encoding="utf-8") as file:
 			json.dump(data, file, indent=4, ensure_ascii=False)
 	except Exception as exc:
-		message = str(exc).strip() or "save failed"
-		raise RuntimeError(message) from exc
+		message = str(exc).strip() or "unknown save error"
+		raise RuntimeError(f"save failed: {message}") from exc
+
+
+def transcribe_video(video_path, transcript_path, model_size="base"):
+	if not os.path.isfile(video_path):
+		raise FileNotFoundError(video_path)
+
+	temp_dir = "temp"
+	if not os.path.isdir(temp_dir):
+		os.makedirs(temp_dir)
+
+	audio_path = "temp/audio.wav"
+	print("extracting audio...")
+	extract_audio(video_path, audio_path)
+	print("loading model...")
+	model = load_model(model_size)
+	print("transcribing...")
+	segments, info = transcribe_audio(audio_path, model)
+	transcript = build_transcript(segments, info.language)
+	print("saving transcript...")
+	save_transcript(transcript, transcript_path)
+	print("done")
+	return transcript
+
+
+if __name__ == "__main__":
+	transcript = transcribe_video("autoshorts/uploads/test.mp4", "transcript.json", "tiny")
+	print(len(transcript["words"]))
