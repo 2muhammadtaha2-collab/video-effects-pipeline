@@ -1,13 +1,37 @@
 # transcription logic here
 import json
 import os
+import shutil
 import subprocess
 
+import imageio_ffmpeg
 from faster_whisper import WhisperModel
 
+
+def get_ffmpeg_executable():
+	ffmpeg_path = os.getenv("FFMPEG_PATH")
+	if ffmpeg_path:
+		if os.path.isfile(ffmpeg_path):
+			return ffmpeg_path
+		else:
+			raise RuntimeError(f"FFMPEG_PATH is set but the file does not exist: {ffmpeg_path}")
+
+	system_ffmpeg = shutil.which("ffmpeg")
+	if system_ffmpeg:
+		return system_ffmpeg
+
+	try:
+		return imageio_ffmpeg.get_ffmpeg_exe()
+	except Exception as exc:
+		raise RuntimeError(
+			"ffmpeg not found. Install ffmpeg and add it to PATH, or set FFMPEG_PATH to the ffmpeg executable."
+		) from exc
+
+
 def extract_audio(video_path, audio_path):
+	ffmpeg_exe = get_ffmpeg_executable()
 	command = [
-		"ffmpeg",
+		ffmpeg_exe,
 		"-y",
 		"-i",
 		video_path,
@@ -65,7 +89,30 @@ def build_transcript(segments, language):
 				}
 			)
 
-	return {"language": language, "words": words}
+	sentences = []
+	chunk = []
+	for word in words:
+		chunk.append(word)
+		if word["word"].endswith((".", "!", "?")) or len(chunk) >= 6:
+			sentences.append(
+				{
+					"text": " ".join(w["word"] for w in chunk),
+					"start": chunk[0]["start"],
+					"end": chunk[-1]["end"],
+				}
+			)
+			chunk = []
+
+	if chunk:
+		sentences.append(
+			{
+				"text": " ".join(w["word"] for w in chunk),
+				"start": chunk[0]["start"],
+				"end": chunk[-1]["end"],
+			}
+		)
+
+	return {"language": language, "words": words, "sentences": sentences}
 
 
 def save_transcript(data, output_path):
@@ -107,6 +154,7 @@ def transcribe_video(video_path, transcript_path, model_size="base"):
 
 if __name__ == "__main__":
 	base_dir = get_autoshorts_root()
-	video_path = os.path.join(base_dir, "uploads", "test.mp4")
+	# video_path = os.path.join(base_dir, "uploads", "test_clip.mp4")
+	video_path = os.path.join(base_dir, "test_clip.mp4")
 	transcript = transcribe_video(video_path, "transcript.json", "tiny")
 	print(len(transcript["words"]))

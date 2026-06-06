@@ -4,3 +4,5 @@ __pycache__/
 uploads/
 shorts_output/
 .env
+
+*.mp4

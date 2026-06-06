@@ -22,6 +22,31 @@ def apply_zoom_effect(clip, zoom_factor=1.3):
     return clip.transform(zoom)
 
 
+def build_sentences_from_words(words):
+    """Builds sentences from word-level transcript data."""
+    sentences = []
+    chunk = []
+
+    for word in words:
+        chunk.append(word)
+        if word["word"].endswith((".", "!", "?")) or len(chunk) >= 6:
+            sentences.append({
+                "text": " ".join(w["word"] for w in chunk),
+                "start": chunk[0]["start"],
+                "end": chunk[-1]["end"],
+            })
+            chunk = []
+
+    if chunk:
+        sentences.append({
+            "text": " ".join(w["word"] for w in chunk),
+            "start": chunk[0]["start"],
+            "end": chunk[-1]["end"],
+        })
+
+    return sentences
+
+
 def apply_effects(rendered_clips, transcript):
     output = []
 
@@ -29,8 +54,6 @@ def apply_effects(rendered_clips, transcript):
         clip_id = clip_info["clip_id"]
         clip_path = clip_info["path"]
 
-        # FIX 4: Get the clip's start time in the original video
-        # Sohaib's renderer should include this in clip_info
         clip_start = clip_info.get("start_time", 0)
 
         print(f"Processing clip {clip_id} (original start: {clip_start}s)...")
@@ -40,18 +63,14 @@ def apply_effects(rendered_clips, transcript):
 
         all_clips = [zoomed_clip]
 
-        # --- Captions (white sentence-level text at bottom) ---
+        # --- Captions (white sentence-level text) ---
         for sentence in transcript["sentences"]:
-
-            # FIX 4: Convert global timestamps to clip-local timestamps
             local_start = sentence["start"] - clip_start
             local_end = sentence["end"] - clip_start
 
-            # Skip if sentence is completely outside this clip
             if local_start >= clip.duration or local_end <= 0:
                 continue
 
-            # Clamp to clip boundaries
             local_start = max(0, local_start)
             local_end = min(local_end, clip.duration)
 
@@ -63,7 +82,7 @@ def apply_effects(rendered_clips, transcript):
                     color="white",
                     stroke_color="black",
                     stroke_width=2,
-                    size=(zoomed_clip.w - 40, None),  # FIX 2: use zoomed_clip.w
+                    size=(zoomed_clip.w - 40, None),
                     method="caption"
                 )
                 .with_start(local_start)
@@ -72,25 +91,17 @@ def apply_effects(rendered_clips, transcript):
             )
             all_clips.append(txt)
 
-        # --- Word Highlights (yellow per-word text in center) ---
+        # --- Word Highlights (yellow per-word text) ---
         for word_info in transcript.get("words", []):
-
-            # FIX 4: Convert global timestamps to clip-local timestamps
             local_start = word_info["start"] - clip_start
             local_end = word_info["end"] - clip_start
 
-            # Skip if word is completely outside this clip
             if local_start >= clip.duration or local_end <= 0:
                 continue
 
-            # Clamp to clip boundaries
             local_start = max(0, local_start)
             local_end = min(local_end, clip.duration)
 
-            # FIX 1: Use a lambda for relative vertical positioning (65% down)
-            # Passing ("center", 0.65) does NOT work in moviepy — it ignores
-            # or misinterprets the float. Use a lambda with pixel calculation.
-            clip_height = zoomed_clip.h
             txt = (
                 TextClip(
                     font="C:/Windows/Fonts/arial.ttf",
@@ -102,7 +113,7 @@ def apply_effects(rendered_clips, transcript):
                 )
                 .with_start(local_start)
                 .with_duration(local_end - local_start)
-                .with_position((0.5, 0.65), relative=True) # FIX 1
+                .with_position((0.5, 0.65), relative=True)
             )
             all_clips.append(txt)
 
@@ -112,7 +123,6 @@ def apply_effects(rendered_clips, transcript):
         output_path = f"shorts_output/final_clip_{clip_id}.mp4"
         final_clip.write_videofile(output_path, codec="libx264")
 
-        # FIX 3: Close all clips to prevent memory leaks and Windows file locks
         final_clip.close()
         zoomed_clip.close()
         clip.close()
@@ -130,34 +140,12 @@ def apply_effects(rendered_clips, transcript):
 # ---- TEST WITH REAL TRANSCRIPT ----
 if __name__ == "__main__":
 
-    with open("transcript.json", "r") as f:
+    with open("transcript.json", "r", encoding="utf-8") as f:
         real_transcript = json.load(f)
 
-    # Build sentences from words
-    words = real_transcript["words"]
-    sentences = []
-    chunk = []
+    if "sentences" not in real_transcript:
+        real_transcript["sentences"] = build_sentences_from_words(real_transcript["words"])
 
-    for word in words:
-        chunk.append(word)
-        if word["word"].endswith((".", "!", "?")) or len(chunk) >= 6:
-            sentences.append({
-                "text": " ".join(w["word"] for w in chunk),
-                "start": chunk[0]["start"],
-                "end": chunk[-1]["end"]
-            })
-            chunk = []
-
-    if chunk:
-        sentences.append({
-            "text": " ".join(w["word"] for w in chunk),
-            "start": chunk[0]["start"],
-            "end": chunk[-1]["end"]
-        })
-
-    real_transcript["sentences"] = sentences
-
-    # start_time = 0 means transcript timestamps already match the test clip
     dummy_clips = [
         {"clip_id": 1, "path": "test_clip.mp4", "start_time": 0}
     ]
