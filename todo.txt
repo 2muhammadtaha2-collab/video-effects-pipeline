@@ -1,0 +1,1 @@
+1. effects.py manages making words into sentences, this part should be in transcriber.py

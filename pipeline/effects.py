@@ -55,6 +55,30 @@ def add_captions(clip, transcript):
     return CompositeVideoClip(clips)
 
 
+def build_sentences_from_words(words):
+    sentences = []
+    chunk = []
+
+    for word in words:
+        chunk.append(word)
+        if word["word"].endswith((".", "!", "?")) or len(chunk) >= 6:
+            sentences.append({
+                "text": " ".join(w["word"] for w in chunk),
+                "start": chunk[0]["start"],
+                "end": chunk[-1]["end"],
+            })
+            chunk = []
+
+    if chunk:
+        sentences.append({
+            "text": " ".join(w["word"] for w in chunk),
+            "start": chunk[0]["start"],
+            "end": chunk[-1]["end"],
+        })
+
+    return sentences
+
+
 def apply_effects(rendered_clips, transcript):
     output = []
 
@@ -84,55 +108,35 @@ def apply_effects(rendered_clips, transcript):
     return output
 
 
-# ---- TEST WITH DUMMY DATA ----
-if __name__ == "__main__":
-    dummy_clips = [
-        {"clip_id": 1, "path": "test_clip.mp4"}
-    ]
+# # ---- TEST WITH DUMMY DATA ----
+# if __name__ == "__main__":
+#     dummy_clips = [
+#         {"clip_id": 1, "path": "test_clip.mp4"}
+#     ]
 
-    dummy_transcript = {
-        "words": [
-            {"word": "Hello", "start": 0.52, "end": 0.83},
-            {"word": "everyone", "start": 0.84, "end": 1.30}
-        ],
-        "sentences": [
-            {"text": "Hello everyone welcome back.", "start": 0.52, "end": 3.45}
-        ]
-    }
+#     dummy_transcript = {
+#         "words": [
+#             {"word": "Hello", "start": 0.52, "end": 0.83},
+#             {"word": "everyone", "start": 0.84, "end": 1.30}
+#         ],
+#         "sentences": [
+#             {"text": "Hello everyone welcome back.", "start": 0.52, "end": 3.45}
+#         ]
+#     }
 
-    result = apply_effects(dummy_clips, dummy_transcript)
-    print(result)
+#     result = apply_effects(dummy_clips, dummy_transcript)
+#     print(result)
 
 # ---- TEST WITH REAL TRANSCRIPT ----
 if __name__ == "__main__":
     import json
 
-    with open("transcript.json", "r") as f:
+    with open("transcript.json", "r", encoding="utf-8") as f:
         real_transcript = json.load(f)
 
-    # Build sentences from words since transcript.json has no sentences
-    words = real_transcript["words"]
-    sentences = []
-    chunk = []
-
-    for word in words:
-        chunk.append(word)
-        if word["word"].endswith((".","!","?")) or len(chunk) >= 6:
-            sentences.append({
-                "text": " ".join(w["word"] for w in chunk),
-                "start": chunk[0]["start"],
-                "end": chunk[-1]["end"]
-            })
-            chunk = []
-
-    if chunk:
-        sentences.append({
-            "text": " ".join(w["word"] for w in chunk),
-            "start": chunk[0]["start"],
-            "end": chunk[-1]["end"]
-        })
-
-    real_transcript["sentences"] = sentences
+    # this is only a fallback now, if sentences not found in transcript.json file then it is built
+    if "sentences" not in real_transcript:
+        real_transcript["sentences"] = build_sentences_from_words(real_transcript["words"])
 
     dummy_clips = [
         {"clip_id": 1, "path": "test_clip.mp4"}
