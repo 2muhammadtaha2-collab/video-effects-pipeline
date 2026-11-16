@@ -24,6 +24,10 @@
 17. Proof and video deliveries attach the evidence, not just verdicts: the half-second frame sheets and the measured numbers (loudness, effect timings, transcript diff) come with the QC report.
 18. Music and sound licences: CC0 or CC BY only — never NC (non-commercial). Photos: check each file's own licence individually. ASSETS.md logs source, licence AND credit line for every asset.
 19. Azure is not available yet — keep the current voice route (Ryan via free web front-ends) and never block production waiting on it. Taha creates the YouTube channel himself and downloads Audio Library tracks that Muse names.
+20. Every video description carries the CC BY credit line for every track used (music and sound), copied from ASSETS.md. No description ships without its credits block.
+21. Outside skills (cinetic, video-shotcraft) are built for films under 90 seconds; ours is a 10-minute narrated documentary. Narration leads: cuts and text land on Ryan's words, music sits underneath. Never cut to the music beat. (Approved 16 Nov 2026; adoption happens only after the proof passes.)
+22. Adopt cinetic's measurable rules into PRODUCTION_BIBLE.md — motion carried across every cut, sound within 30 ms of each cut, no snapping or frozen motion. After the proof passes, not before.
+23. Only 10–15 devices suited to dark history get picked from the skills, listed for Taha's approval before any are built. No product-ad style moves.
 
 ## Standing process lessons
 14. Quality over completion, always — Taha's overnight brief said it, the Andes v1 delivery violated it. If finishing and quality conflict, quality wins and Taha hears about it before delivery.

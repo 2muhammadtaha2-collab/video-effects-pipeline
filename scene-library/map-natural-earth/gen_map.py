@@ -35,7 +35,7 @@ CRASH = (-70.286, -34.765) # Glaciar de las Lágrimas, Argentina (dossier)
 PLANNED = [(-56.16,-34.90), (-68.85,-32.89), (-69.58,-35.48), (-71.24,-34.98), (-70.67,-33.45)]
 ACTUAL  = [(-56.16,-34.90), (-68.85,-32.89), (-69.58,-35.48), TURN, CRASH]
 REGIONS = [("ARGENTINA", -66.5, -38.5), ("CHILE", -70.8, -30.6), ("URUGUAY", -56.3, -32.6),
-           ("PACIFIC OCEAN", -79.5, -22.0), ("ATLANTIC OCEAN", -51.5, -29.0)]
+           ("PACIFIC OCEAN", -79.5, -22.0), ("ATLANTIC OCEAN", -46.0, -33.0)]
 
 # ---- build the coastline path ------------------------------------------------
 def build_land_path():
@@ -119,9 +119,6 @@ TEMPLATE = r"""<!DOCTYPE html>
   .region { position: absolute; transform: translate(-50%,-50%); font-family: 'DejaVu Sans', sans-serif;
     font-weight: 700; font-size: 38px; letter-spacing: 9px; color: rgba(170,200,230,.34); white-space: nowrap; }
   .region.ocean { font-size: 34px; letter-spacing: 6px; font-style: italic; color: rgba(140,180,220,.26); }
-  #crashTag { position: absolute; transform: translate(-50%,-50%); font-family: 'DejaVu Sans', sans-serif;
-    font-weight: 700; font-size: 36px; letter-spacing: 2px; color: #ff8a80; white-space: nowrap; opacity: 0;
-    text-shadow: 0 2px 10px rgba(0,0,0,.9); }
   #callout { position: absolute; left: 1030px; top: 905px; width: 716px; padding: 20px 28px 22px;
     background: rgba(7,11,17,.86); border-left: 5px solid #ffb042; opacity: 0;
     box-shadow: 0 14px 44px rgba(0,0,0,.55); }
@@ -203,9 +200,6 @@ const regionEls = REGIONS.map((r) => {
   d.className = 'region' + (r.name.includes('OCEAN') ? ' ocean' : '');
   d.textContent = r.name; ov.appendChild(d); return d;
 });
-const tagEl = document.createElement('div'); tagEl.id = 'crashTag'; tagEl.textContent = 'CRASH SITE';
-ov.appendChild(tagEl);
-
 const cam = document.getElementById('cam');
 const plan = document.getElementById('routePlan'), act = document.getElementById('routeAct');
 const plane = document.getElementById('planeMark');
@@ -263,11 +257,8 @@ window.__onSeek = (t) => {
     el.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%,-50%)`;
     el.style.opacity = String(rf);
   });
-  // crash tag + callout + leader
+  // callout + leader (the pulsing red marker itself is the crash identifier)
   const cp = SP(CRASH, t);
-  const tagO = clamp01((t - 3.9) / 0.25);
-  tagEl.style.transform = `translate(${cp.x}px,${cp.y - 52}px) translate(-50%,-50%)`;
-  tagEl.style.opacity = String(tagO);
   const co = clamp01((t - 3.75) / 0.25);
   callout.style.opacity = String(co);
   callout.style.transform = `translateX(${(1 - easeO(co)) * 26}px)`;
