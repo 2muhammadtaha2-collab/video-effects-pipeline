@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Scene 3 — Map / The Wrong Turn</title>
+<link rel="stylesheet" href="../assets/core.css">
+<style>
+  #stage { background: #05090f; }
+  #sceneSvg { position: absolute; inset: 0; }
+  .lbl { font-family: 'FreeMonoBold', monospace; fill: #c8d8e8; }
+  .cityLbl { font-size: 25px; letter-spacing: 3px; }
+  .oceanLbl { font-size: 24px; letter-spacing: 9px; fill: #39536e; }
+  #mapTitle { position: absolute; left: 84px; top: 64px; font-size: 24px; letter-spacing: 6px; color: #7e97ad; opacity: 0; }
+  #mapTitle b { color: #d7e5f2; font-weight: normal; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="sceneSvg" width="1920" height="1080" viewBox="0 0 1920 1080">
+    <defs>
+      <radialGradient id="mapGlow" cx="0.42" cy="0.55" r="0.75">
+        <stop offset="0" stop-color="#16283e" stop-opacity="0.9"/>
+        <stop offset="1" stop-color="#05090f" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect x="0" y="0" width="1920" height="1080" fill="url(#mapGlow)"/>
+
+    <g id="mapG">
+      <!-- faint lat/long grid -->
+      <g stroke="#ffffff" stroke-width="1" opacity="0.045">
+        <path d="M160,0 V1080 M480,0 V1080 M800,0 V1080 M1120,0 V1080 M1440,0 V1080 M1760,0 V1080"/>
+        <path d="M0,180 H1920 M0,420 H1920 M0,660 H1920 M0,900 H1920"/>
+      </g>
+
+      <!-- landmass: abstracted southern cone -->
+      <path id="land" fill="#0e1724" stroke="#3a5a7c" stroke-width="2.5"
+        d="M600,30 L1050,58 L1420,140 L1562,300 L1522,470 L1382,560 L1402,722 L1242,882 L1082,1012 L902,1047 L822,822 L762,562 L702,302 L642,122 Z"/>
+      <!-- cordillera band -->
+      <path id="cord" fill="#1d2d42"
+        d="M666,112 L737,302 L797,562 L857,822 L907,1002 L847,1012 L792,802 L737,542 L692,292 L642,122 Z"/>
+      <g stroke="#5d7d9e" stroke-width="2" opacity="0.5" fill="none">
+        <path d="M676,140 L724,300 L772,540 L818,800 L862,980"/>
+        <path d="M700,180 L748,330 L796,560 L842,820"/>
+        <path d="M664,240 L706,380 L748,600 L788,840"/>
+      </g>
+      <!-- internal borders (dashed, abstracted) -->
+      <g stroke="#4d6a88" stroke-width="1.6" stroke-dasharray="7 8" opacity="0.55" fill="none">
+        <path d="M737,302 L797,562 L857,822 L907,1002"/>
+        <path d="M1290,428 L1402,452 L1522,470"/>
+        <path d="M1082,1012 L1100,860 L1150,730"/>
+      </g>
+
+      <!-- ocean labels -->
+      <text class="lbl oceanLbl" x="212" y="620">PACIFIC</text>
+      <text class="lbl oceanLbl" x="212" y="656">OCEAN</text>
+      <text class="lbl oceanLbl" x="1560" y="600">ATLANTIC</text>
+      <text class="lbl oceanLbl" x="1560" y="636">OCEAN</text>
+
+      <!-- intended route (dashed, plan) -->
+      <path id="routePlan" pathLength="100" fill="none" stroke="#8fa6bd" stroke-width="3"
+        stroke-dasharray="100" stroke-dashoffset="100" opacity="0.75"
+        d="M1318,452 C1150,430 1000,420 838,428 C782,436 726,452 672,470"/>
+      <!-- actual route (solid amber) — veers south into the mountains -->
+      <path id="routeAct" pathLength="100" fill="none" stroke="#ffb042" stroke-width="4.5"
+        stroke-dasharray="100" stroke-dashoffset="100" stroke-linecap="round"
+        d="M1318,452 C1150,430 1000,420 838,428 C806,472 784,548 800,640"/>
+
+      <!-- moving plane marker -->
+      <g id="plane">
+        <circle r="13" fill="rgba(255,176,66,.28)"/>
+        <circle r="6.5" fill="#ffcf87" stroke="#fff2dd" stroke-width="1.6"/>
+      </g>
+
+      <!-- crash marker: hidden until the plane arrives at 9.2s; rings pulse in __onSeek -->
+      <g id="crash">
+        <circle id="ring1" cx="800" cy="640" r="10" fill="none" stroke="#ff5347" stroke-width="3" opacity="0"/>
+        <circle id="ring2" cx="800" cy="640" r="10" fill="none" stroke="#ff5347" stroke-width="3" opacity="0"/>
+        <g id="crashCore" opacity="0">
+          <circle cx="800" cy="640" r="7" fill="#ff5347" stroke="#ffd9d4" stroke-width="1.6"/>
+          <path d="M788,628 L812,652 M812,628 L788,652" stroke="#ff8a80" stroke-width="3.4" stroke-linecap="round"/>
+        </g>
+      </g>
+      <g id="crashTag" opacity="0">
+        <rect x="716" y="556" width="168" height="40" fill="#0a111c" stroke="#ff5347" stroke-width="1.4"/>
+        <text class="lbl" x="800" y="584" text-anchor="middle" font-size="21" letter-spacing="3" fill="#ffb3ab">CRASH SITE</text>
+      </g>
+
+      <!-- cities -->
+      <g id="cityMvd">
+        <circle cx="1318" cy="452" r="7" fill="#e8f1f9"/>
+        <text class="lbl cityLbl" x="1342" y="442">MONTEVIDEO</text>
+        <text class="lbl" x="1342" y="472" font-size="18" fill="#7e97ad" letter-spacing="2">URUGUAY</text>
+      </g>
+      <g id="cityScl">
+        <circle cx="672" cy="470" r="7" fill="#e8f1f9"/>
+        <text class="lbl cityLbl" x="646" y="442" text-anchor="end">SANTIAGO</text>
+        <text class="lbl" x="646" y="472" font-size="18" fill="#7e97ad" letter-spacing="2" text-anchor="end">CHILE</text>
+      </g>
+      <g id="cityMdz">
+        <circle cx="838" cy="428" r="5" fill="#a9bfd4"/>
+        <text class="lbl" x="856" y="420" font-size="20" letter-spacing="2" fill="#a9bfd4">MENDOZA</text>
+      </g>
+
+      <!-- callout: 60 km off course -->
+      <line id="leader" x1="814" y1="652" x2="1006" y2="742" stroke="#ffb042" stroke-width="2.4"
+        stroke-dasharray="240" stroke-dashoffset="240"/>
+      <g id="callout" opacity="0">
+        <rect x="1012" y="700" width="606" height="104" fill="#0a111cee" stroke="#ffb042" stroke-width="2"/>
+        <rect x="1012" y="700" width="7" height="104" fill="#ffb042"/>
+        <text x="1044" y="756" font-size="43" fill="#ffb042" letter-spacing="2">60 KM OFF COURSE</text>
+        <text class="lbl" x="1045" y="786" font-size="18" letter-spacing="2" fill="#9db4c9">TURNED WEST TOO EARLY — EAST OF THE PEAKS</text>
+      </g>
+    </g>
+  </svg>
+  <div id="mapTitle" class="mono">THE FLIGHT PATH — <b>13 OCTOBER 1972</b></div>
+</div>
+<canvas id="grain"></canvas>
+<div id="vignette"></div>
+
+<script>window.SCENE = { id: 'scene3_map', duration: 6.2 };</script>
+<script src="../assets/gsap.min.js"></script>
+<script src="../assets/core.js"></script>
+<script>
+const tl = gsap.timeline({ paused: true });
+// camera push toward the crash area for the whole scene (16.5-22.7s of the
+// assembled segment: the route must finish drawing at local 5.3s and the
+// marker pulse be running into the 6.2s end)
+tl.fromTo('#mapG', { scale: 1 }, { scale: 1.09, duration: 6.2, ease: 'none', svgOrigin: '800 640' }, 0)
+  .fromTo('#mapG', { opacity: 0 }, { opacity: 1, duration: 0.8, ease: 'power2.out' }, 0)
+  .to('#mapTitle', { opacity: 1, duration: 0.6 }, 0.45);
+// cities pop in
+for (const [sel, at] of [['#cityMvd', 0.8], ['#cityMdz', 1.05], ['#cityScl', 1.3]]) {
+  tl.fromTo(sel, { opacity: 0, scale: 0.7, transformOrigin: 'center' }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2.2)' }, at);
+}
+// the plan draws first (dashed), then reality (amber) — they diverge after Mendoza
+tl.to('#routePlan', { strokeDashoffset: 0, duration: 1.0, ease: 'power1.inOut' }, 1.7)
+  .to('#routeAct', { strokeDashoffset: 0, duration: 3.0, ease: 'power1.inOut' }, 2.3)
+  .to('#crashCore', { opacity: 1, duration: 0.25, ease: 'power1.out' }, 5.3)
+  .fromTo('#crashTag', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, 5.5)
+  .to('#leader', { strokeDashoffset: 0, duration: 0.3, ease: 'power2.out' }, 5.68)
+  .fromTo('#callout', { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.35, ease: 'power3.out' }, 5.82);
+window.__tl = tl;
+
+// ---- per-frame: plane follows the actual route; crash rings pulse ----------
+const act = document.getElementById('routeAct');
+const plane = document.getElementById('plane');
+const L = act.getTotalLength();
+const ring1 = document.getElementById('ring1'), ring2 = document.getElementById('ring2');
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
+const easeInOutQuad = (p) => (p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2);
+window.__onSeek = (t) => {
+  // plane progress matches the routeAct draw window (2.3s → 5.3s), same power1.inOut easing
+  const p = easeInOutQuad(clamp01((t - 2.3) / 3.0));
+  const pt = act.getPointAtLength(p * L);
+  plane.setAttribute('transform', `translate(${pt.x},${pt.y})`);
+  plane.style.opacity = (t < 2.3 || t > 5.35) ? 0 : 1;
+  // pulsing rings after the plane arrives (t > 5.3): two rings, phase-offset
+  for (const [ring, ph] of [[ring1, 0], [ring2, 0.5]]) {
+    if (t <= 5.3) { ring.setAttribute('opacity', 0); continue; }
+    const phT = ((t - 5.3) / 1.7 + ph) % 1;
+    ring.setAttribute('r', 10 + phT * 46);
+    ring.setAttribute('opacity', (1 - phT) * 0.85);
+  }
+  window.__grainLevel = 0.12;
+};
+
+window.__boot();
+</script>
+</body>
+</html>

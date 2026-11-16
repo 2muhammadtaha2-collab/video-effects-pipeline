@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Scene 1 — Cold Open / Radio</title>
+<link rel="stylesheet" href="../assets/core.css">
+<style>
+  #stage { background: radial-gradient(ellipse 90% 70% at 50% 42%, #0a0f16 0%, #04060a 70%); }
+  #shake { position: absolute; inset: 0; }
+
+  /* ---------- radio panel ---------- */
+  #panel { position: absolute; left: 320px; top: 218px; width: 1280px; height: 318px;
+    background: linear-gradient(180deg, #141a23 0%, #0b0f16 55%, #070a0f 100%);
+    border: 1px solid #2b3646; border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.75), inset 0 1px 0 rgba(190,215,240,.08); opacity: 0; }
+  #panel .brand { position: absolute; left: 34px; top: 20px; font-size: 17px; letter-spacing: 5px; color: #5d7189; }
+  #panel .band { position: absolute; right: 216px; top: 20px; font-size: 17px; letter-spacing: 5px; color: #5d7189; }
+
+  #lamp { position: absolute; right: 36px; top: 21px; width: 18px; height: 18px; border-radius: 50%;
+    background: #2a1c08; border: 1px solid #4a3610; opacity: .55; }
+  #lampRing { position: absolute; right: 27px; top: 12px; width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid rgba(255,176,66,.85); opacity: 0; }
+  #lampLabel { position: absolute; right: 66px; top: 21px; font-size: 15px; letter-spacing: 4px; color: #6d5636; }
+
+  #dial { position: absolute; left: 50px; top: 64px; width: 1180px; height: 168px; border-radius: 10px; overflow: hidden;
+    background: linear-gradient(180deg, #2e1e07 0%, #50350b 34%, #6b4a12 52%, #3a2708 78%, #201503 100%);
+    box-shadow: inset 0 0 60px rgba(0,0,0,.55), inset 0 2px 0 rgba(255,205,120,.25); }
+  #dialGlow { position: absolute; inset: 0; opacity: .35;
+    background: radial-gradient(ellipse 65% 90% at 50% 55%, rgba(255,178,64,.34) 0%, transparent 70%); }
+  #dial svg { position: absolute; inset: 0; }
+  #needleWrap { position: absolute; top: 0; left: 0; width: 1180px; height: 168px; }
+  #needle { position: absolute; top: 6px; left: 0; width: 3px; height: 156px; background: #ffd9a0;
+    box-shadow: 0 0 9px 2px rgba(255,166,48,.95), 0 0 26px 5px rgba(255,140,20,.45); }
+  #dialGlass { position: absolute; inset: 0;
+    background: linear-gradient(115deg, rgba(255,255,255,.10) 0%, transparent 34%, transparent 70%, rgba(255,255,255,.05) 100%); }
+
+  #readout { position: absolute; left: 50px; top: 248px; font-size: 25px; letter-spacing: 3px; color: #ffb042; opacity: .92; }
+  #readout .dim { color: #7a5a28; }
+  .knob { position: absolute; top: 240px; width: 62px; height: 62px; border-radius: 50%;
+    background: radial-gradient(circle at 36% 32%, #39465a 0%, #1a222f 55%, #0a0e14 100%);
+    border: 1px solid #33415450; border: 1px solid #334154; box-shadow: 0 6px 16px rgba(0,0,0,.6), inset 0 1px 0 rgba(200,220,245,.15); }
+  .knob::after { content: ''; position: absolute; left: 29px; top: 6px; width: 3px; height: 17px; background: #93a9c4; border-radius: 2px; }
+  #knobL { right: 128px; } #knobR { right: 44px; }
+
+  /* ---------- kinetic type ---------- */
+  #type { position: absolute; left: 0; top: 592px; width: 1920px; text-align: center; }
+  #line1 { font-size: 96px; letter-spacing: 6px; color: #e8f0f8; white-space: nowrap;
+    text-shadow: 0 6px 34px rgba(0,0,0,.85); }
+  #line2 { margin-top: 18px; font-size: 148px; letter-spacing: 8px; color: #ffb042; white-space: nowrap;
+    text-shadow: 0 0 44px rgba(255,150,30,.30), 0 8px 40px rgba(0,0,0,.9); }
+  #type .w { display: inline-block; opacity: 0; }
+  #stamp { display: inline-block; margin-top: 30px; padding: 10px 30px 12px; opacity: 0;
+    border: 4px solid #ff5347; border-radius: 6px; color: #ff7166; background: rgba(64,10,5,.28);
+    font-size: 42px; letter-spacing: 9px; text-shadow: 0 0 22px rgba(255,60,40,.35);
+    box-shadow: 0 0 34px rgba(255,60,40,.18), inset 0 0 22px rgba(255,60,40,.10); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="shake">
+    <div id="panel">
+      <div class="brand mono">TRANSISTOR&nbsp;RADIO</div>
+      <div class="band mono">FM&nbsp;·&nbsp;SW&nbsp;·&nbsp;MW</div>
+      <div id="lampLabel" class="mono">SIGNAL</div>
+      <div id="lampRing"></div>
+      <div id="lamp"></div>
+      <div id="dial">
+        <div id="dialGlow"></div>
+        <svg id="ticks" width="1180" height="168" viewBox="0 0 1180 168"></svg>
+        <div id="needleWrap"><div id="needle"></div></div>
+        <div id="dialGlass"></div>
+      </div>
+      <div id="readout" class="mono">FM <span id="freq">88.0</span> <span class="dim" id="lockmsg">— SEARCHING</span></div>
+      <div class="knob" id="knobL"></div>
+      <div class="knob" id="knobR"></div>
+    </div>
+
+    <div id="type">
+      <div id="line1"><span class="w">THE</span> <span class="w">SEARCH</span> <span class="w">HAS</span> <span class="w">BEEN</span></div>
+      <div id="line2"><span class="w">CALLED</span> <span class="w">OFF.</span></div>
+      <div><span id="stamp" class="mono">PRESUMED DEAD</span></div>
+    </div>
+  </div>
+</div>
+<canvas id="grain"></canvas>
+<div id="vignette"></div>
+
+<script>window.SCENE = { id: 'scene1_radio', duration: 13 };</script>
+<script src="../assets/gsap.min.js"></script>
+<script src="../assets/core.js"></script>
+<script>
+// ---- dial geometry: FM 88..108 mapped to x 60..1120 inside the 1180px dial
+const X0 = 60, X1 = 1120, F0 = 88, F1 = 108;
+const fx = (f) => X0 + ((f - F0) / (F1 - F0)) * (X1 - X0);
+const LOCK_F = 100.6;
+
+// build tick marks + numbers
+(function buildTicks() {
+  const svg = document.getElementById('ticks');
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; };
+  mk('line', { x1: 30, y1: 118, x2: 1150, y2: 118, stroke: 'rgba(255,205,130,.4)', 'stroke-width': 2 });
+  for (let f = 88; f <= 108.001; f += 0.5) {
+    const major = Math.abs(f % 2) < 0.01, x = fx(f);
+    mk('line', { x1: x, y1: 118, x2: x, y2: major ? 76 : 94, stroke: major ? 'rgba(255,214,150,.95)' : 'rgba(255,205,130,.5)', 'stroke-width': major ? 3 : 2 });
+    if (major) { const t = mk('text', { x: x, y: 56, 'text-anchor': 'middle', 'font-size': 27, fill: '#ffd9a0', 'font-family': 'FreeMonoBold, monospace' }); t.textContent = Math.round(f); }
+  }
+  // the lock frequency gets a red marker tick
+  mk('line', { x1: fx(LOCK_F), y1: 118, x2: fx(LOCK_F), y2: 66, stroke: '#ff5347', 'stroke-width': 4 });
+  const lt = mk('text', { x: fx(LOCK_F), y: 148, 'text-anchor': 'middle', 'font-size': 19, fill: '#ff8a80', 'font-family': 'FreeMonoBold, monospace' }); lt.textContent = 'NEWS';
+})();
+
+const needle = document.getElementById('needle');
+const freqEl = document.getElementById('freq');
+const state = { f: 88 };
+function paintNeedle() {
+  needle.style.transform = `translateX(${fx(state.f)}px)`;
+  freqEl.textContent = state.f.toFixed(1);
+}
+
+// ---- timeline (paused, seek-only) -------------------------------------------
+const tl = gsap.timeline({ paused: true });
+tl.to('#panel', { opacity: 1, duration: 0.9, ease: 'power2.out' }, 0.15)
+  .to('#dialGlow', { opacity: 0.5, duration: 0.9 }, 0.15);
+// the search: sweep, overshoot, fall back, home in — across the whole setup
+// narration, locking just before "The search..." is spoken at 7.52s
+tl.to(state, { f: 104.2, duration: 2.0, ease: 'power2.inOut', onUpdate: paintNeedle }, 0.6)
+  .to(state, { f: 92.4, duration: 1.2, ease: 'power2.inOut', onUpdate: paintNeedle }, 2.7)
+  .to(state, { f: 101.9, duration: 1.4, ease: 'power2.inOut', onUpdate: paintNeedle }, 4.0)
+  .to(state, { f: 100.3, duration: 0.7, ease: 'power1.out', onUpdate: paintNeedle }, 5.5)
+  .to(state, { f: 100.55, duration: 0.5, ease: 'power1.out', onUpdate: paintNeedle }, 6.3)
+  .to(state, { f: LOCK_F, duration: 0.3, ease: 'power1.out', onUpdate: paintNeedle }, 6.9);
+// lock at 7.3: lamp lights, dial warms, one ring pulse
+tl.to('#lamp', { opacity: 1, backgroundColor: '#ffb042', boxShadow: '0 0 18px 5px rgba(255,166,48,.8)', duration: 0.12 }, 7.3)
+  .to('#lampLabel', { color: '#ffb042', duration: 0.12 }, 7.3)
+  .fromTo('#lampRing', { scale: 0.4, opacity: 0.9 }, { scale: 2.3, opacity: 0, duration: 0.8, ease: 'power2.out' }, 7.3)
+  .to('#dialGlow', { opacity: 0.85, duration: 0.5 }, 7.3)
+  .set('#lockmsg', { textContent: '— LOCKED' }, 7.3);
+
+// kinetic type slams — word by word, with a stage shake on each impact.
+// Timings are the narration's own word times (slowed track): The 7.52,
+// search 7.76, been 9.30, called 9.52, off 9.83.
+const words1 = document.querySelectorAll('#line1 .w');
+const slam = (el, at, big) => {
+  tl.fromTo(el, { opacity: 0, scale: big ? 2.6 : 2.1, filter: 'blur(12px)' },
+    { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.26, ease: 'power4.in' }, at)
+    .to(el, { scale: 0.985, duration: 0.07, ease: 'power1.out' }, at + 0.26)
+    .to(el, { scale: 1, duration: 0.12, ease: 'power2.out' }, at + 0.33);
+  tl.fromTo('#shake', { x: big ? -11 : -6, y: big ? 6 : 3 }, { x: 0, y: 0, duration: 0.24, ease: 'power2.out' }, at + 0.24);
+};
+[7.52, 7.76, 8.70, 9.30].forEach((at, i) => slam(words1[i], at, false));
+slam(document.querySelectorAll('#line2 .w')[0], 9.52, true);
+slam(document.querySelectorAll('#line2 .w')[1], 9.83, true);
+// slow settle: type eases a touch smaller as the scene breathes out
+tl.to('#type', { scale: 0.985, duration: 2.0, ease: 'power1.inOut' }, 10.4);
+// the verdict, stamped on the spoken word "dead." (12.57s)
+gsap.set('#stamp', { rotation: -3.5 });
+tl.fromTo('#stamp', { opacity: 0, scale: 2.5, rotation: -11, filter: 'blur(6px)' },
+    { opacity: 1, scale: 1, rotation: -3.5, filter: 'blur(0px)', duration: 0.22, ease: 'power4.in' }, 12.57)
+  .fromTo('#shake', { x: -13, y: 7 }, { x: 0, y: 0, duration: 0.26, ease: 'power2.out' }, 12.79);
+
+window.__tl = tl;
+paintNeedle();
+
+// ---- per-frame hook: jitter, breathing glow, grain level --------------------
+window.__onSeek = (t) => {
+  // needle micro-jitter: hunting static before lock, faint tremor after
+  const amp = t < 7.3 ? 1.6 : 0.45;
+  const j = Math.sin(t * 43.7) * amp + Math.sin(t * 17.3) * amp * 0.6;
+  document.getElementById('needleWrap').style.transform = `translateX(${j}px)`;
+  // dial glow breathes once locked
+  if (t >= 7.3) document.getElementById('dialGlow').style.opacity = 0.85 + Math.sin(t * 1.35) * 0.07;
+  // static grain: heavy while searching, drops hard at lock, low bed after
+  window.__grainLevel = t < 7.3 ? 0.52 : (t < 7.55 ? 0.30 : 0.15);
+};
+
+window.__boot();
+</script>
+</body>
+</html>

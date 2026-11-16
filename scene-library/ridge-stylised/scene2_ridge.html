@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Scene 2 — Ridge Reveal</title>
+<link rel="stylesheet" href="../assets/core.css">
+<style>
+  #stage { background: #131c28; }
+  #sceneSvg { position: absolute; inset: 0; }
+  #snow { position: absolute; inset: 0; z-index: 6; }
+
+  /* ---------- lower third ---------- */
+  #lower { position: absolute; left: 112px; top: 824px; z-index: 10; }
+  #rule { width: 0; height: 3px; background: #ffb042; box-shadow: 0 0 12px rgba(255,166,48,.55); margin-bottom: 20px; }
+  #ltTitle { font-size: 44px; letter-spacing: 7px; color: #eef4fa; white-space: nowrap;
+    text-shadow: 0 3px 18px rgba(0,0,0,.9); min-height: 52px; }
+  #caret { display: inline-block; width: 22px; height: 40px; background: #ffb042; vertical-align: -6px; margin-left: 6px; opacity: 0; }
+  #ltSub { margin-top: 12px; font-size: 22px; letter-spacing: 5px; color: #a9c2d8; opacity: 0;
+    text-shadow: 0 2px 10px rgba(0,0,0,1), 0 0 26px rgba(0,0,0,.95), 0 0 6px rgba(0,0,0,1); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="sceneSvg" width="1920" height="1080" viewBox="0 0 1920 1080">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1c2836"/>
+        <stop offset="0.45" stop-color="#3d5069"/>
+        <stop offset="0.72" stop-color="#71869c"/>
+        <stop offset="1" stop-color="#93a7ba"/>
+      </linearGradient>
+      <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+        <stop offset="0" stop-color="#e8f1f8" stop-opacity="0.34"/>
+        <stop offset="1" stop-color="#e8f1f8" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="soft" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="15"/></filter>
+      <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity="0.07"/>
+        <stop offset="0.38" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="1" stop-color="#000000" stop-opacity="0.26"/>
+      </linearGradient>
+    </defs>
+
+    <rect x="-300" y="-160" width="2520" height="900" fill="url(#sky)"/>
+    <g id="glowG"><ellipse cx="1470" cy="430" rx="620" ry="300" fill="url(#glow)"/></g>
+    <g id="clouds" fill="#0a1119" opacity="0.20" filter="url(#soft)">
+      <ellipse cx="420" cy="196" rx="560" ry="30"/>
+      <ellipse cx="1450" cy="128" rx="680" ry="24"/>
+      <ellipse cx="960" cy="286" rx="500" ry="20"/>
+    </g>
+
+    <!-- ridge layers are generated in JS (seeded) so the peaks are irregular -->
+    <g id="far"></g>
+    <g id="mid"></g>
+    <g id="nearMid"></g>
+    <g id="near"></g>
+  </svg>
+  <canvas id="snow" width="1920" height="1080"></canvas>
+
+  <div id="lower">
+    <div id="rule"></div>
+    <div id="ltTitle" class="mono"><span id="typed"></span><span id="caret"></span></div>
+    <div id="ltSub" class="mono">URUGUAYAN AIR FORCE · FLIGHT 571 · 45 ABOARD</div>
+  </div>
+</div>
+<canvas id="grain"></canvas>
+<div id="vignette"></div>
+
+<script>window.SCENE = { id: 'scene2_ridge', duration: 3.5 };</script>
+<script src="../assets/gsap.min.js"></script>
+<script src="../assets/core.js"></script>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const mk = (parent, tag, attrs) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+
+// Seeded ridge generator: alternating peaks/valleys with jittered spacing and
+// shoulder points, so the silhouette reads as terrain, not a sawtooth.
+function ridgePoints(seed, baseY, hMin, hMax) {
+  const rnd = mulberry32(seed);
+  const pts = [];
+  let x = -340, peak = true;
+  pts.push([x, baseY + 30]);
+  while (x < 2260) {
+    const dx = 55 + rnd() * 115;
+    const h = peak ? hMin + rnd() * (hMax - hMin) : (hMin + rnd() * (hMax - hMin)) * 0.34;
+    x += dx;
+    pts.push([x, baseY - h]);
+    // shoulder: a smaller intermediate jag on the way to the next point
+    if (rnd() > 0.45) pts.push([x + 18 + rnd() * 30, baseY - h * (0.55 + rnd() * 0.3)]);
+    peak = !peak;
+  }
+  return pts;
+}
+function buildRidge(id, seed, baseY, hMin, hMax, fill, snowOpacity, snowWidth) {
+  const g = document.getElementById(id);
+  const pts = ridgePoints(seed, baseY, hMin, hMax);
+  const top = pts.map((p) => `${p[0]},${p[1]}`).join(' L');
+  mk(g, 'path', { fill, d: `M${top} L2280,1120 L-360,1120 Z` });
+  // depth overlay: light at the crest falling to shadow at the base
+  mk(g, 'path', { fill: 'url(#shade)', d: `M${top} L2280,1120 L-360,1120 Z` });
+  mk(g, 'path', { fill: 'none', stroke: '#e6eff8', 'stroke-width': snowWidth, opacity: snowOpacity, 'stroke-linejoin': 'round', d: `M${top}` });
+  return pts;
+}
+buildRidge('far', 101, 660, 120, 285, '#5b7189', 0.35, 2.5);
+buildRidge('mid', 202, 790, 150, 275, '#37485e', 0.45, 3);
+const nmPts = buildRidge('nearMid', 303, 905, 165, 300, '#1e2a3a', 0.55, 3);
+buildRidge('near', 404, 1075, 55, 145, '#0b1119', 0.28, 2.5);
+
+// ---- the wreck, seated into a near-mid slope --------------------------------
+// find the polyline segment nearest x=1150 and sit the wreck just inside it
+(function placeWreck() {
+  // choose the gentlest slope segment in the x 900..1450 window — a wreck lies
+  // along a slope, it does not stab into it
+  let best = null, bestAng = 1e9;
+  for (let i = 0; i < nmPts.length - 1; i++) {
+    const [x1, y1] = nmPts[i], [x2, y2] = nmPts[i + 1];
+    const midX = (x1 + x2) / 2;
+    if (midX < 900 || midX > 1450 || x2 - x1 < 40) continue;
+    const a = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+    if (Math.abs(a) < Math.abs(bestAng)) { bestAng = a; best = { x1, y1, x2, y2 }; }
+  }
+  if (!best) { best = { x1: 1080, y1: 800, x2: 1220, y2: 770 }; bestAng = -12; }
+  const ang = Math.max(-26, Math.min(26, bestAng));
+  const t = 0.5, wx = best.x1 + (best.x2 - best.x1) * t, wy = best.y1 + (best.y2 - best.y1) * t;
+  const g = mk(document.getElementById('nearMid'), 'g', { transform: `translate(${wx},${wy + 20}) rotate(${ang}) scale(1.04)` });
+  // slide scar: a paler streak running down-slope behind the wreck
+  mk(g, 'path', { d: 'M-250,-3 L-34,1 L-250,9 Z', fill: 'rgba(214,228,242,.08)' });
+  // snow drift the fuselage is buried in
+  mk(g, 'ellipse', { cx: 6, cy: 13, rx: 102, ry: 10, fill: 'rgba(205,222,238,.20)' });
+  // main fuselage: nose right, broken off before the tail
+  mk(g, 'path', { d: 'M-96,8 L-88,-4 L-30,-11 L52,-12 L88,-6 L96,2 L88,9 L20,13 L-70,13 Z', fill: '#04070c' });
+  mk(g, 'path', { d: 'M-88,-4 L-30,-11 L52,-12 L88,-6', fill: 'none', stroke: 'rgba(205,226,245,.45)', 'stroke-width': 2 });
+  // wing stub
+  mk(g, 'path', { d: 'M-6,10 L26,26 L40,25 L16,8 Z', fill: '#04070c' });
+  // severed tail section, lying apart and tilted
+  const tail = mk(g, 'g', { transform: 'translate(-142,-2) rotate(-24)' });
+  mk(tail, 'path', { d: 'M-34,6 L-20,-6 L16,-8 L30,-20 L37,-19 L28,-4 L36,4 L30,9 L-24,10 Z', fill: '#04070c' });
+  mk(tail, 'path', { d: 'M-20,-6 L16,-8 L30,-20', fill: 'none', stroke: 'rgba(205,226,245,.35)', 'stroke-width': 2 });
+  // debris
+  for (const [cx, cy, r] of [[-196, 12, 3.2], [-58, 18, 2.6], [36, 17, 2.8], [128, 10, 2.2], [-118, 16, 2.0]]) {
+    mk(g, 'circle', { cx, cy, r, fill: '#04070c' });
+  }
+})();
+
+// parallax push for the whole (short) scene: near layers grow faster than far
+// ones. This scene is the 3.5s stunned beat after the news (13.0-16.5s in the
+// assembled segment), so the push runs at beat pace, not drift pace.
+const tl = gsap.timeline({ paused: true });
+const ORG = '50% 58%';
+tl.fromTo('#glowG',   { scale: 1.02 }, { scale: 1.07, duration: 3.5, ease: 'none', transformOrigin: ORG }, 0)
+  .fromTo('#far',     { scale: 1.03 }, { scale: 1.10, duration: 3.5, ease: 'none', transformOrigin: ORG }, 0)
+  .fromTo('#mid',     { scale: 1.03 }, { scale: 1.16, duration: 3.5, ease: 'none', transformOrigin: ORG }, 0)
+  .fromTo('#nearMid', { scale: 1.03 }, { scale: 1.23, duration: 3.5, ease: 'none', transformOrigin: ORG }, 0)
+  .fromTo('#near',    { scale: 1.03 }, { scale: 1.33, duration: 3.5, ease: 'none', transformOrigin: ORG }, 0)
+  .fromTo('#clouds',  { x: -14 },      { x: 26, duration: 3.5, ease: 'none' }, 0);
+// lower third: rule wipes, title types (in __onSeek), sub-line settles
+gsap.set('#ltSub', { y: 10 });
+tl.to('#rule', { width: 560, duration: 0.45, ease: 'power3.out' }, 0.85)
+  .to('#ltSub', { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 2.55);
+window.__tl = tl;
+
+const snow = makeSnow(document.getElementById('snow'), 160, 4242);
+const TITLE = 'THE ANDES — 13 OCTOBER 1972';
+const typedEl = document.getElementById('typed');
+const caretEl = document.getElementById('caret');
+const TYPE_AT = 1.15, TYPE_CPS = 24; // chars per second
+
+window.__onSeek = (t) => {
+  snow(t);
+  // typewriter: characters are a pure function of t
+  const n = Math.max(0, Math.min(TITLE.length, Math.floor((t - TYPE_AT) * TYPE_CPS)));
+  typedEl.textContent = TITLE.slice(0, n);
+  const typing = t >= TYPE_AT && n < TITLE.length;
+  caretEl.style.opacity = typing ? 1 : (t >= TYPE_AT && (t * 1.6) % 1 < 0.55 ? 1 : 0);
+  window.__grainLevel = 0.13;
+};
+
+window.__boot();
+</script>
+</body>
+</html>
