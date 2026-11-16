@@ -47,4 +47,31 @@ If the bar cannot be reached because of budget, machine limits, a blocked networ
 ## 7. Permanent infrastructure
 - **LESSONS.md** (same folder): every piece of feedback from Taha becomes a permanent rule there, the same day. Never repeat a mistake already listed.
 - **scene-library/**: every scene type built becomes a reusable component, stored here with its source.
-- **ASSETS.md per video**: every photo, sound and music file, with source and licence.
+- **ASSETS.md per video**: every photo, sound and music file, with source, licence and credit line. Music and sounds: **CC0 or CC BY only, never NC**. Photos: each file's own licence checked individually.
+
+## 8. Topic research (browser only — vidIQ is not used for research)
+- YouTube: search the niche, filter by view count and by upload date. Open the top channels' "Popular" tab. Look for outliers: videos with far more views than the channel's subscriber count or its usual videos.
+- YouTube search suggestions: type the topic and record what autocomplete offers. That is what people actually search.
+- Google Trends and Wikipedia pageview stats: check the story has steady or rising interest in US, UK and Canada.
+- Reddit history and mystery communities: see which stories get the most discussion and which questions people keep asking.
+- Output to Taha: 3 topics, each with the one-sentence story, the best existing video on it (views, age, channel size), and the angle nobody has used yet. He picks.
+
+## 9. Hook and script research
+- For the chosen topic, read the transcripts of the 5 best performing videos. Note how each opens in the first 30 seconds, where the reveals fall, and what the top comments say viewers loved or found missing.
+- Use this only to learn structure. Never copy sentences, scene order or titles. Every script is written fresh from our own dossier.
+
+## 10. Script and story standard
+- Topic test: the story fits in one sentence with an impossible choice or a contradiction in it.
+- Title and thumbnail first: 3 plain curiosity titles under 60 characters and one thumbnail idea, approved by Taha before any script is written.
+- Hook: open inside the most dramatic moment, never with background or a channel intro. By 30 seconds the viewer knows the stakes and the question the ending will answer.
+- Open loops: one unanswered question is always running. Close one, open the next. A reveal, reversal or new danger every 45 to 60 seconds.
+- People: follow one main character. Use real names, ages, exact words and small physical details from the dossier.
+- Ending: deliver what the title promised, land the last line, no long outro.
+- Language: short sentences written for the ear, about 150 words a minute. Cut any paragraph the story survives without.
+- Truth: nothing invented, disputed points labelled, no title the video does not pay off.
+- Every script comes with a retention map: a table of timestamps showing which hook or open question is active.
+
+## 11. Research limits
+- At most 10 videos studied per topic, one research pass per video.
+- Save all research to RESEARCH.md in the repo so it is never repeated.
+- Report findings as numbers and links, not opinions.

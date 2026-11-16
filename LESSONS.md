@@ -28,6 +28,15 @@
 21. Outside skills (cinetic, video-shotcraft) are built for films under 90 seconds; ours is a 10-minute narrated documentary. Narration leads: cuts and text land on Ryan's words, music sits underneath. Never cut to the music beat. (Approved 16 Nov 2026; adoption happens only after the proof passes.)
 22. Adopt cinetic's measurable rules into PRODUCTION_BIBLE.md — motion carried across every cut, sound within 30 ms of each cut, no snapping or frozen motion. After the proof passes, not before.
 23. Only 10–15 devices suited to dark history get picked from the skills, listed for Taha's approval before any are built. No product-ad style moves.
+24. QC must measure the on-screen duration of every text element and print in/out times in the QC report. Any element meant to be read — stamps, lower-thirds, callouts — must measure at least 2 s fully visible. (Proof v2's PRESUMED DEAD stamp was prominent for only ~0.4 s and QC still passed it. Never again.)
+25. A "shot" is what the viewer sees, not what freezedetect reports. QC judges visible change from the frames; a technically changing but visually static scene counts as static.
+26. No single element (for example the radio dial) is the only thing on screen for more than 4 s. Long beats get cutaways to real material and the frame stays filled.
+27. Maps zoom to the region where the action happens so the key movement fills the frame. Labels never touch or overlap. Something moves from the first second of the scene.
+28. Music ducking releases when the voice pauses — the music comes up in the gaps — and the bed must be audible above 200 Hz, not only bass.
+29. A date on screen must say what it is: label it with its event (for example "CRASHED — 13 OCTOBER 1972"), never a bare date the viewer has to interpret.
+30. Build in segments: after the proof passes, build the first 90 seconds only and stop for Taha's approval before building more. Never build a full video in one pass again.
+31. Carry-over fix for the Andes build (from proof v3 approval, 16 Nov 2026): the music must stay audible in the pause after "called off" — that silence is a story beat, and the bed carries it; never let the mix drop to near-silence there.
+32. Carry-over fix for the Andes build: the 4.4 s cutaway photo shows a modern-day visitor at the wreckage. In the build, crop him out or label the shot as the site today — a modern person must never sit unlabelled inside a 1972 scene.
 
 ## Standing process lessons
 14. Quality over completion, always — Taha's overnight brief said it, the Andes v1 delivery violated it. If finishing and quality conflict, quality wins and Taha hears about it before delivery.
